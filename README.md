@@ -1,8 +1,6 @@
 # Distributed Cache
 
-A compact C++17 distributed in-memory cache inspired by
-[`rabbicse/distributed-cache`](https://github.com/rabbicse/distributed-cache).
-It completes the distributed portion of that project's roadmap and adds bounded
+A compact C++17 distributed in-memory cache which completes the distributed portion of that project's roadmap and adds bounded
 LRU storage, failure injection, and four-node benchmarking.
 
 ## Design

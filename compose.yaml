@@ -1,5 +1,6 @@
 x-cache-node: &cache-node
   build: .
+  image: distributed-cache:local
   restart: unless-stopped
   healthcheck:
     test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]

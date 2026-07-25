@@ -1,0 +1,26 @@
+x-cache-node: &cache-node
+  build: .
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+    interval: 2s
+    timeout: 1s
+    retries: 10
+    start_period: 2s
+services:
+  cache-1:
+    <<: *cache-node
+    environment: {PORT: 8080, CAPACITY: "${CACHE_CAPACITY:-10000}", NODE_ID: cache-1}
+    ports: ["8081:8080"]
+  cache-2:
+    <<: *cache-node
+    environment: {PORT: 8080, CAPACITY: "${CACHE_CAPACITY:-10000}", NODE_ID: cache-2}
+    ports: ["8082:8080"]
+  cache-3:
+    <<: *cache-node
+    environment: {PORT: 8080, CAPACITY: "${CACHE_CAPACITY:-10000}", NODE_ID: cache-3}
+    ports: ["8083:8080"]
+  cache-4:
+    <<: *cache-node
+    environment: {PORT: 8080, CAPACITY: "${CACHE_CAPACITY:-10000}", NODE_ID: cache-4}
+    ports: ["8084:8080"]

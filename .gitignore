@@ -1,4 +1,7 @@
-build/
+out/
+target/
+*.class
+*.jar
 __pycache__/
 *.py[cod]
 .venv/

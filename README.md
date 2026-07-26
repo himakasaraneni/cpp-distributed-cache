@@ -1,13 +1,14 @@
 # Distributed Cache
 
-A compact C++17 distributed in-memory cache which completes the distributed portion of that project's roadmap and adds bounded
-LRU storage, failure injection, and four-node benchmarking.
+A compact Java 21 distributed in-memory cache with bounded LRU storage,
+replication, failure injection, and four-node benchmarking.
 
 ## Design
 
 - Four Dockerized nodes expose a small HTTP API and own independent caches.
-- A hash table plus recency list gives average O(1) `GET`, `PUT`, `DELETE`, and
-  LRU promotion/eviction, protected by a mutex for concurrent requests.
+- Java's access-ordered `LinkedHashMap` gives average O(1) `GET`, `PUT`,
+  `DELETE`, and LRU promotion/eviction. Synchronized cache operations make it
+  safe for concurrent virtual-thread requests.
 - The client uses rendezvous hashing, which minimizes remapping when nodes change.
 - Writes go to two owners. Reads try the primary then its replica, so one failed
   node does not interrupt access to already replicated keys.
@@ -17,10 +18,12 @@ writes during a partition can diverge and restarts intentionally lose memory.
 
 ## Run
 
-Requires Docker Compose and Python 3.10+.
+Requires Docker Compose and Python 3.10+. Java is installed inside the Docker
+image, so a local JDK is optional.
 
 ```sh
-docker compose up -d --build --wait
+docker build -t distributed-cache:local .
+docker compose up -d --no-build --wait
 curl http://localhost:8081/health
 ```
 
@@ -45,12 +48,22 @@ print(cache.get("user:42"))
 
 ## Test and benchmark
 
+The Java unit test is compiled and executed automatically while the Docker image
+is built:
+
 ```sh
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+docker build -t distributed-cache:local .
 python tests/node_failure_test.py
 python benchmarks/benchmark.py --requests 20000 --clients 32
+```
+
+To run Java tests locally when JDK 21 is installed:
+
+```sh
+mkdir -p out/main out/test
+javac --release 21 -d out/main src/main/java/com/distributedcache/*.java
+javac --release 21 -cp out/main -d out/test src/test/java/com/distributedcache/*.java
+java -ea -cp out/main:out/test com.distributedcache.LruCacheTest
 ```
 
 The failure test starts the cluster, writes a replicated key, stops that key's

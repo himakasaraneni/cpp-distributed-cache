@@ -17,7 +17,10 @@ def wait_for_nodes():
             except OSError: time.sleep(1)
         else: raise RuntimeError(f"node on port {port} did not become healthy")
 def main():
-    compose("up", "-d", "--build", "--wait")
+    # All four services use the same image. Build once to avoid parallel
+    # exporters racing to write the same image tag.
+    compose("build", "cache-1")
+    compose("up", "-d", "--no-build", "--wait")
     stopped = None
     try:
         wait_for_nodes()
